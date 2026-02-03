@@ -62,7 +62,7 @@
                                 <!-- Submit Button -->
                                 <div class="form-group mt-3 mb-0">
                                     <button type="submit" class="btn btn-lg btn-block btn-login" tabindex="4"
-                                        style="background-color: #ff5608;">
+                                        style="background-color: var(--theme-color);">
                                         Login
                                     </button>
                                 </div>

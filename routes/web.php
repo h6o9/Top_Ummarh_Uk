@@ -9,9 +9,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WebController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\RoleController;
-use App\Http\Controllers\UserController;
 use App\Http\Controllers\Admin\FaqController;
-use App\Http\Controllers\Admin\SeoController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\ContactController;
@@ -40,10 +38,6 @@ Route::get('/admin-forgot-password', [AdminController::class, 'forgetPassword'])
 Route::post('/admin-reset-password-link', [AdminController::class, 'adminResetPasswordLink']);
 Route::get('/change_password/{id}', [AdminController::class, 'change_password']);
 Route::post('/admin-reset-password', [AdminController::class, 'ResetPassword']);
-// routes/web.php
-Route::get('admin/users/{id}/form-responses', [UserController::class, 'formResponsesIndex'])
-    ->name('users.form_responses');
-Route::get('admin/users/form-responses/{id}', [UserController::class, 'show'])->name('form_responses.show');
 
 
 Route::prefix('admin')->middleware(['admin', 'check.subadmin.status'])->group(function () {
@@ -117,23 +111,7 @@ Route::prefix('admin')->middleware(['admin', 'check.subadmin.status'])->group(fu
       Route::delete('faq-destroy/{id}', [FaqController::class, 'faqdelete'])->name('faq.destroy');
     Route::post('/faqs/reorder', [FaqController::class, 'reorder'])->name('faq.reorder');
 
-    // ############ Users #################
-
-    Route::get('/user', [UserController::class, 'Index'])->name('user.index') ->middleware('check.permission:Users,view');
-Route::get('/user-create', [UserController::class, 'createview'])->name('user.createview') ->middleware('check.permission:Users,create');
-Route::post('/user-store', [UserController::class, 'create'])->name('user.create') ->middleware('check.permission:Users,create');
-Route::get('/user-edit/{id}', [UserController::class, 'edit'])->name('user.edit') ->middleware('check.permission:Users,edit');
-Route::post('/user-update/{id}', [UserController::class, 'update'])->name('user.update') ->middleware('check.permission:Users,edit');
-Route::delete('/users-destory/{id}', [UserController::class, 'delete'])->name('user.delete') ->middleware('check.permission:Users,delete');
-// Route::get('/users/trashed', [UserController::class, 'trashed']);
-// Route::post('/users/{id}/restore', [UserController::class, 'restore']);
-Route::delete('/users/{id}/force', [UserController::class, 'forceDelete'])->name('user.forceDelete') ->middleware('check.permission:Users,delete');
-
-Route::post('/users/toggle-status', [UserController::class, 'toggleStatus'])->name('user.toggle-status');
-
-
-
-
+ 
     // ############ Sub Admin #################
     Route::controller(SubAdminController::class)->group(function () {
         Route::get('/subadmin',  'index')->name('subadmin.index') ->middleware('check.permission:Sub Admins,view');
@@ -182,12 +160,6 @@ Route::post('/blogs/reorder', [BlogController::class, 'reorder'])->name('blog.re
 
     });
 
-    // ############ Seo Routes #################
-
-     Route::get('/seo', [SeoController::class, 'index'])->name('seo.index');
-    Route::get('/seo/{id}/edit', [SeoController::class, 'edit'])->name('seo.edit');
-    Route::post('/seo/{id}', [SeoController::class, 'update'])->name('seo.update');
-    Route::get('/admin/seo/page/{id}', [SeoController::class, 'getPage'])->name('seo.page');
 
 
     // ############ Web Routes #################

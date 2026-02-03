@@ -14,9 +14,7 @@
                                 <div class="row ">
                                     <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 pr-0 pt-3">
                                         <div class="card-content">
-                                            <h5 class="font-15">
-
-                                                Total Notifications</h5>
+                                            <h5 class="font-15">Total Visa Requests</h5>
                                             <h2 class="mb-3 font-18">
                                                 {{-- {{ $totalFarmers }} --}}
                                             </h2>
@@ -40,7 +38,7 @@
                                 <div class="row ">
                                     <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 pr-0 pt-3">
                                         <div class="card-content">
-                                            <h5 class="font-15"> Total Users</h5>
+                                            <h5 class="font-15"> Total Ticketing Requests </h5>
                                             <h2 class="mb-3 font-18">
                                                 {{-- {{ $totalDealers }} --}}
                                             </h2>
@@ -64,7 +62,7 @@
                                 <div class="row ">
                                     <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 pr-0 pt-3">
                                         <div class="card-content">
-                                            <h5 class="font-15">Total FAQ's </h5>
+                                            <h5 class="font-15">Total Transfer Requests</h5>
                                             <h2 class="mb-3 font-18">
                                                 {{-- {{ $totalInsuranceCrops }} --}}
                                             </h2>

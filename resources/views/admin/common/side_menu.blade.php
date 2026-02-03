@@ -39,19 +39,6 @@
                 </li>
             @endif
 
-            {{--  Users --}}
-
-            @if (Auth::guard('admin')->check() ||
-                    ($sideMenuPermissions->has('Users') && $sideMenuPermissions['Users']->contains('view')))
-                <li class="dropdown {{ request()->is('admin/user*') ? 'active' : '' }}">
-                    <a href="{{ url('admin/user') }}" class="nav-link">
-                        <i data-feather="users"></i>
-                        <span>Users</span>
-                    </a>
-                </li>
-            @endif
-
-
             {{--  Blogs --}}
 
             @if (Auth::guard('admin')->check() ||
@@ -62,32 +49,7 @@
                             data-feather="book-open"></i><span>Blogs</span></a>
                 </li>
             @endif
-
-             {{--  SEO --}}
-
-            @if (Auth::guard('admin')->check() ||
-                    ($sideMenuPermissions->has('Roles') && $sideMenuPermissions['seo']->contains('seo')))
-                {{-- FAQS --}}
-                <li class="dropdown {{ request()->is('admin/seo*') ? 'active' : '' }}">
-                    <a href="{{ url('admin/seo') }}" class="nav-link"><i
-                            data-feather="trending-up"></i><span>SEO</span></a>
-                </li>
-            @endif
-            
-             {{-- Notification --}}
-
-            @if (Auth::guard('admin')->check() ||
-                    ($sideMenuPermissions->has('Notifications') && $sideMenuPermissions['Notifications']->contains('view')))
-                {{-- Notification --}}
-                <li class="dropdown {{ request()->is('admin/notification*') ? 'active' : '' }}">
-                    <a href="
-                {{ route('notification.index') }}
-                " class="nav-link">
-                        <i data-feather="bell"></i><span>Notifications</span>
-                    </a>
-                </li>
-            @endif
-
+   
             {{--  FAQS --}}
 
             @if (Auth::guard('admin')->check() ||
