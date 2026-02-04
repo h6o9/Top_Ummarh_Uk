@@ -13,11 +13,12 @@ use App\Http\Controllers\Admin\FaqController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\ContactController;
-use App\Http\Controllers\Admin\CustomFormsController;
 use App\Http\Controllers\Admin\SecurityController;
 use App\Http\Controllers\Admin\SubAdminController;
+use App\Http\Controllers\Admin\CustomFormsController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\RolePermissionController;
+use App\Http\Controllers\Admin\UmmrahPackagesController;
 
 /*
 |--------------------------------------------------------------------------
@@ -129,6 +130,16 @@ Route::prefix('admin')->middleware(['admin', 'check.subadmin.status'])->group(fu
 
     });
 
+
+            // ############ Blogs #################
+
+			 Route::get('/umrah-packages', [UmmrahPackagesController::class, 'index'])->name('umrahpackages.index');
+    Route::get('umrahpackages/create', [UmmrahPackagesController::class, 'create'])->name('umrahpackages.create');
+    Route::post('umrahpackages', [UmmrahPackagesController::class, 'store'])->name('umrahpackages.store');
+    Route::get('umrahpackages/{id}/edit', [UmmrahPackagesController::class, 'edit'])->name('umrahpackages.edit');
+    Route::put('umrahpackages/{id}', [UmmrahPackagesController::class, 'update'])->name('umrahpackages.update');
+    Route::delete('umrahpackages/{id}', [UmmrahPackagesController::class, 'destroy'])->name('umrahpackages.destroy');
+Route::post('umrahpackages/toggle-status', [UmmrahPackagesController::class, 'toggleStatus'])->name('umrahpackages.toggleStatus');
 
             // ############ Blogs #################
 

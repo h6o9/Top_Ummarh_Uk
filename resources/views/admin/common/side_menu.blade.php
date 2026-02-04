@@ -39,6 +39,16 @@
                 </li>
             @endif
 
+			            {{--  Ummarah Packages --}}
+			@if (Auth::guard('admin')->check() ||
+                    ($sideMenuPermissions->has('Umrah Packages') && $sideMenuPermissions['Umrah Packages']->contains('view')))
+                {{-- FAQS --}}
+                <li class="dropdown {{ request()->is('admin/umrah-packages*') ? 'active' : '' }}">
+                    <a href="{{ url('admin/umrah-packages') }}" class="nav-link"><i
+                            data-feather="book-open"></i><span>Umrah Packages</span></a>
+                </li>
+            @endif
+
             {{--  Blogs --}}
 
             @if (Auth::guard('admin')->check() ||
