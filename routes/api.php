@@ -10,6 +10,7 @@ use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\Api\ContactUsController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\SideMenuPermissionController;
+use App\Http\Controllers\Api\GetUmmarhPackagesController;
 
 
 
@@ -54,8 +55,8 @@ Route::get('/companies', [FormController::class, 'getCompanies']);
 Route::get('/companies-for-form/{id}', [FormController::class, 'getCompaniesForForm']);
 Route::get('/companies-form-details/{form_no}', [FormController::class, 'getCompaniesFormDetails']);
 
-
-
+// Ummarh Packages 
+Route::get('/ummarh-packages', [GetUmmarhPackagesController::class, 'index']);
 
 
 

@@ -1,6 +1,21 @@
 @extends('admin.layout.app')
 @section('title', 'Umrah Packages')
 
+<style>
+	.description-cell {
+    display: -webkit-box;
+    -webkit-line-clamp: 3; /* sirf 3 lines show */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 300px; /* optional: column width */
+    cursor: pointer;
+}
+.description-cell:hover {
+    color: #007bff; /* optional: hover color */
+}
+</style>
+
 @section('content')
 <div class="main-content" style="min-height: 562px;">
     <section class="section">
@@ -23,6 +38,7 @@
                                         <th>Package Name</th>
                                         <th>Month</th>
                                         <th>Stars</th>
+										<th>Description</th>
                                         <th>Flight Info</th>
                                         <th>Visa Service</th>
                                         <th>City</th>
@@ -39,7 +55,12 @@
                                         <td>{{ $package->package_name }}</td>
                                         <td>{{ $package->month }}</td>
                                         <td>{{ $package->stars }}</td>
-                                        <td>{{ $package->flight_info ?? '-' }}</td>
+										<td>
+											<div class="description-cell" title="{{ $package->description }}">
+												{{ $package->description }}
+											</div>
+										</td>
+										<td>{{ $package->flight_info ?? '-' }}</td>
                                         <td>{{ $package->visa_service}}</td>
                                         <td>
                                             @foreach ($package->packageDetails as $detail)
@@ -57,15 +78,20 @@
 											@endforeach
 										</td>                                        
 										<td>
-                                            <label class="custom-switch">
-                                                <input type="checkbox" class="custom-switch-input toggle-status" data-id="{{ $package->id }}" {{ $package->status ? 'checked' : '' }}>
-                                                <span class="custom-switch-indicator"></span>
-                                                <span class="custom-switch-description">
-                                                    {{ $package->status ? 'Activated' : 'Deactivated' }}
-                                                </span>
-                                            </label>
-                                        </td>
-                                        <td>
+												<div class="d-flex align-items-center">
+													<div class="custom-switch mr-0">
+														<input type="checkbox" class="custom-control-input status-toggle" 
+															id="status_{{ $package->id }}" 
+															data-id="{{ $package->id }}" 
+															{{ $package->status ? 'checked' : '' }}>
+														<label class="custom-control-label" for="status_{{ $package->id }}"></label>
+													</div>
+													<span class="status-text" id="status-text-{{ $package->id }}">
+														{{ $package->status ? 'Activated' : 'Deactivated' }}
+													</span>
+												</div>
+											</td>
+											<td>
                                             <div class="d-flex">
                                                 <a href="{{ route('umrahpackages.edit',$package->id) }}" class="btn btn-primary mr-1">
                                                     <i class="fa fa-edit"></i>
@@ -96,60 +122,43 @@
 
 @section('js')
 <script>
-$(document).ready(function() {
-    // DataTable init (unchanged)
-    $('#table_id_packages').DataTable({
-        "order": [[0, "asc"]],
-        "responsive": true
-    });
+$(document).ready(function(){
 
-    // Delete confirmation (unchanged)
-    $(document).on('click', '.show_confirm', function(e) {
-        e.preventDefault();
-        let form = $(this).closest('form');
-
-        Swal.fire({
-            title: 'Are you sure you want to delete this record??',
-            text: "If you delete this Ummrah Package record, it will be gone forever.",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, delete it!'
-        }).then((result) => {
-            if(result.isConfirmed){
-                form.submit();
-            }
-        });
-    });
-
-    // ✅ Toggle Status AJAX
-    $('.toggle-status').on('change', function() {
-        var packageId = $(this).data('id');
+    $('.status-toggle').change(function(){
         var checkbox = $(this);
+        var packageId = checkbox.data('id');
+        var statusText = $('#status-text-' + packageId);
+        var newStatus = checkbox.is(':checked') ? 1 : 0;
+
         $.ajax({
             url: "{{ route('umrahpackages.toggleStatus') }}",
             type: "POST",
             data: {
                 _token: "{{ csrf_token() }}",
-                id: packageId
+                id: packageId,
+                status: newStatus
             },
-            success: function(response) {
+            success: function(response){
                 if(response.success){
-                    toastr.success(response.message);
-                    checkbox.closest('.custom-switch').find('.custom-switch-description')
-                        .text(response.status ? 'Activated' : 'Deactivated');
+                    // Update side text
+                    statusText.text(response.status ? 'Activated' : 'Deactivated');
+                    statusText.removeClass('text-success text-danger')
+                              .addClass(response.status ? 'text-success' : 'text-danger');
+
+                    // ✅ Show toastr
+                    toastr.success('Package Status Updated Successfully');
                 } else {
-                    toastr.error(response.message);
-                    checkbox.prop('checked', !checkbox.prop('checked')); // revert if fail
+                    toastr.error('Something went wrong!');
+                    checkbox.prop('checked', !newStatus); // revert
                 }
             },
-            error: function() {
-                toastr.error('Failed to update status!');
-                checkbox.prop('checked', !checkbox.prop('checked')); // revert if fail
+            error: function(){
+                toastr.error('Error updating status!');
+                checkbox.prop('checked', !newStatus); // revert
             }
         });
     });
+
 });
 </script>
 @endsection
