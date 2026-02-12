@@ -140,6 +140,7 @@ Route::prefix('admin')->middleware(['admin', 'check.subadmin.status'])->group(fu
     Route::put('umrahpackages/{id}', [UmmrahPackagesController::class, 'update'])->name('umrahpackages.update');
     Route::delete('umrahpackages/{id}', [UmmrahPackagesController::class, 'destroy'])->name('umrahpackages.destroy');
 Route::post('umrahpackages/toggle-status', [UmmrahPackagesController::class, 'toggleStatus'])->name('umrahpackages.toggleStatus');
+Route::get('/get-hotels/{city}', [UmmrahPackagesController::class, 'getHotelsByCity'])->name('getHotelsByCity');
 // Route::post('/umrahpackages/toggle-status', [UmrahPackageController::class, 'toggleStatus'])
 //      ->name('umrahpackages.toggleStatus');
             // ############ Blogs #################

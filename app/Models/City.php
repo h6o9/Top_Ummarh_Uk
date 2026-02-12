@@ -9,8 +9,10 @@ class City extends Model
 {
     use HasFactory;
 
-	  public function packageDetails()
+    protected $guarded = [];
+
+    public function hotels()
     {
-        return $this->hasMany(PackageDetail::class, 'city_id');
+        return $this->belongsToMany(Hotel::class, 'hotel_city', 'city_id', 'hotel_id');
     }
 }

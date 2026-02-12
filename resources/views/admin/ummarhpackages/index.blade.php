@@ -102,7 +102,7 @@
                                                     @method('DELETE')
                                                 </form>
 
-                                                <button class="show_confirm btn" style="background-color: #cb84fe;" data-form="delete-form-{{ $package->id }}" type="button">
+                                                <button class="show_confirm btn" style="background-color: #343f52;" data-form="delete-form-{{ $package->id }}" type="button">
                                                     <span><i class="fa fa-trash"></i></span>
                                                 </button>
                                             </div>
@@ -124,6 +124,7 @@
 <script>
 $(document).ready(function(){
 
+    // Status toggle (aapka pehle ka code)
     $('.status-toggle').change(function(){
         var checkbox = $(this);
         var packageId = checkbox.data('id');
@@ -140,12 +141,9 @@ $(document).ready(function(){
             },
             success: function(response){
                 if(response.success){
-                    // Update side text
                     statusText.text(response.status ? 'Activated' : 'Deactivated');
                     statusText.removeClass('text-success text-danger')
                               .addClass(response.status ? 'text-success' : 'text-danger');
-
-                    // ✅ Show toastr
                     toastr.success('Package Status Updated Successfully');
                 } else {
                     toastr.error('Something went wrong!');
@@ -155,6 +153,25 @@ $(document).ready(function(){
             error: function(){
                 toastr.error('Error updating status!');
                 checkbox.prop('checked', !newStatus); // revert
+            }
+        });
+    });
+
+    // Delete button confirm
+    $('.show_confirm').click(function(event){
+        event.preventDefault();
+        var formId = $(this).data('form');
+        Swal.fire({
+            title: 'Are you sure you want to delete this record?',
+            text: "If you delete this Package record, it will be gone forever.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $('#' + formId).submit(); // ✅ Submit the form
             }
         });
     });
