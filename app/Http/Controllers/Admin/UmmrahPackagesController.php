@@ -30,99 +30,121 @@ class UmmrahPackagesController extends Controller
 }
 
 // AJAX request ke liye
-public function getHotelsByCity(Request $request)
+public function getHotelsByCity($city)
 {
-    $cityId = $request->city_id;
     $hotels = DB::table('hotel_city')
         ->join('hotels', 'hotel_city.hotel_id', '=', 'hotels.id')
-        ->where('hotel_city.city_id', $cityId)
+        ->where('hotel_city.city_id', $city)
         ->select('hotels.id','hotels.name')
         ->get();
 
     return response()->json($hotels);
 }
 
+
+
     // Store new package
-    public function store(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'name' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('umrah_packages', 'package_name')
-            ],
-            'month' => 'required|integer|min:1|max:12',
-            'price' => 'required|numeric|min:0',
-            'visa_service' => 'required|string|max:255',
-            'flight_info' => 'required|string|max:255',
-            'description' => 'required|string',
-            'stars' => 'required|integer',
-            'status' => 'required|in:0,1',
-            'hotel_id' => 'required|exists:hotels,id',
-            'cities' => 'required|array|min:1',
-            'cities.*' => 'required|exists:cities,id',
-            'days' => 'required|array|min:1',
-            'days.*' => 'required|integer|min:1',
-            'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
-        ], [
-            'name.required' => 'Package name is required.',
-            'name.unique' => 'Package name already exists.',
-            'image.max' => 'Image size must be less than 2MB.',
-            'stars.min' => 'Stars must be at least 1.',
-            'stars.max' => 'Stars cannot exceed 5.',
-            'days.*.required' => 'Each city must have number of nights.',
-            'cities.*.required' => 'City selection is required.',
+public function store(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'name' => [
+            'required',
+            'string',
+            'max:255',
+            Rule::unique('umrah_packages', 'package_name')
+        ],
+        'month' => 'required|integer|min:1|max:12',
+        'price' => 'required|numeric|min:0',
+        'visa_service' => 'required|string|max:255',
+        'flight_info' => 'required|string|max:255',
+        'description' => 'required|string',
+        'stars' => 'required|integer|min:1',
+        'status' => 'required|in:0,1',
+        'cities' => 'required|array|min:1',
+        'cities.*' => 'required|exists:cities,id',
+        'hotels' => 'required|array|min:1', // Changed from hotel_id to hotels array
+        'hotels.*' => 'required|exists:hotels,id',
+        'days' => 'required|array|min:1',
+        'days.*' => 'required|integer|min:1',
+        'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
+    ], [
+        'name.required' => 'Package name is required.',
+        'name.unique' => 'Package name already exists.',
+        'image.required' => 'Package image is required.',
+        'image.max' => 'Image size must be less than 2MB.',
+        'stars.required' => 'Stars rating is required.',
+        'stars.min' => 'Stars must be at least 1.',
+        'stars.max' => 'Stars cannot exceed 5.',
+        'cities.required' => 'At least one city is required.',
+        'cities.*.required' => 'City selection is required.',
+        'hotels.required' => 'At least one hotel is required.',
+        'hotels.*.required' => 'Hotel selection is required for each city.',
+        'days.required' => 'Nights information is required.',
+        'days.*.required' => 'Each city must have number of nights.',
+        'days.*.min' => 'Nights must be at least 1.',
+    ]);
+
+    if ($validator->fails()) {
+        return back()->withErrors($validator)->withInput();
+    }
+
+    DB::beginTransaction();
+
+    try {
+        // IMAGE SAVE
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $imageName = time() . '_' . uniqid() . '.' . $request->image->extension();
+            $request->image->move(public_path('admin/assets/images/umrah-packages'), $imageName);
+            $imagePath = 'admin/assets/images/umrah-packages/' . $imageName;
+        }
+
+        // CREATE PACKAGE
+        $package = UmrahPackage::create([
+            'package_name' => $request->name,
+            'month' => $request->month,
+            'price_per_person' => $request->price,
+            'visa_service' => $request->visa_service,
+            'flight_info' => $request->flight_info,
+            'description' => $request->description,
+            'stars' => $request->stars,
+            'status' => $request->status,
+            'image' => $imagePath,
         ]);
 
-        if ($validator->fails()) {
-            return back()->withErrors($validator)->withInput();
-        }
-
-        DB::beginTransaction();
-
-        try {
-            // IMAGE SAVE
-            $imagePath = null;
-            if ($request->hasFile('image')) {
-                $imageName = time() . '.' . $request->image->extension();
-                $request->image->move(public_path('admin/assets/images'), $imageName);
-                $imagePath = 'admin/assets/images/' . $imageName;
+        // PACKAGE DETAILS - Each city with its own hotel
+        foreach ($request->cities as $index => $cityId) {
+            // Make sure we have corresponding hotel for this city
+            if (!isset($request->hotels[$index])) {
+                throw new \Exception("Hotel not specified for city at position " . ($index + 1));
             }
-
-            // CREATE PACKAGE
-            $package = UmrahPackage::create([
-                'package_name' => $request->name,
-                'month' => $request->month,
-                'price_per_person' => $request->price,
-                'visa_service' => $request->visa_service,
-                'flight_info' => $request->flight_info,
-                'description' => $request->description,
-                'stars' => $request->stars,
-                'status' => $request->status,
-                'image' => $imagePath,
+            
+            PackageDetail::create([
+                'package_id' => $package->id,
+                'city_id' => $cityId,
+                'hotel_id' => $request->hotels[$index], // Use hotel for this specific city
+                'time_duration' => $request->days[$index] . ' Nights',
             ]);
-
-            // PACKAGE DETAILS
-            foreach ($request->cities as $i => $cityId) {
-                PackageDetail::create([
-                    'package_id' => $package->id,
-                    'city_id' => $cityId,
-                    'hotel_id' => $request->hotel_id,
-                    'time_duration' => $request->days[$i] . ' Nights',
-                ]);
-            }
-
-            DB::commit();
-
-            return redirect()->route('umrahpackages.index')
-                ->with('success', 'Package created successfully!');
-
-        } catch (\Throwable $e) {
-            DB::rollBack();
-            return back()->with('error', $e->getMessage())->withInput();
         }
+
+        DB::commit();
+
+        return redirect()->route('umrahpackages.index')
+            ->with('success', 'Package created successfully!');
+
+    } catch (\Throwable $e) {
+        DB::rollBack();
+        
+        // Delete uploaded image if package creation failed
+        if (isset($imagePath) && file_exists(public_path($imagePath))) {
+            unlink(public_path($imagePath));
+        }
+        
+        return back()->with('error', 'Error creating package: ' . $e->getMessage())->withInput();
     }
+}
+
+
 
     // Show form to edit package
     public function edit($id)
@@ -134,23 +156,36 @@ public function getHotelsByCity(Request $request)
     }
 
     // Update package
-    public function update(Request $request, $id)
+ public function update(Request $request, $id)
 {
     $validator = Validator::make($request->all(), [
-        'name'          => 'required|string|max:255',
-        'month'         => 'required|integer|between:1,12',
-        'price'         => 'required|numeric|min:1|max:100000',
+        'name'          => 'required|string|max:255|unique:umrah_packages,package_name,' . $id,
+        'month'         => 'required|integer',
+        'price'         => 'required|numeric|min:1',
         'visa_service'  => 'required|string|max:255',
         'flight_info'   => 'required|string|max:255',
         'description'   => 'required|string',
-        'stars'         => 'required|integer',
+        'stars'         => 'required|integer|min:1',
         'status'        => 'required|boolean',
-        'hotel_id'      => 'required|exists:hotels,id',
         'cities'        => 'required|array|min:1',
         'cities.*'      => 'required|exists:cities,id',
+        'hotels'        => 'required|array|min:1',
+        'hotels.*'      => 'required|exists:hotels,id',
         'days'          => 'required|array|min:1',
         'days.*'        => 'required|integer|min:1|max:30',
         'image'         => 'nullable|image|mimes:jpg,jpeg,png,gif,webp|max:2048'
+    ], [
+        'name.required' => 'Package name is required.',
+        'name.unique' => 'Package name already exists.',
+        'cities.required' => 'At least one city is required.',
+        'cities.*.required' => 'City selection is required.',
+        'hotels.required' => 'At least one hotel is required.',
+        'hotels.*.required' => 'Hotel selection is required for each city.',
+        'days.required' => 'Nights information is required.',
+        'days.*.required' => 'Each city must have number of nights.',
+        'days.*.min' => 'Nights must be at least 1.',
+        'stars.min' => 'Stars must be at least 1.',
+        'stars.max' => 'Stars cannot exceed 5.',
     ]);
 
     if ($validator->fails()) {
@@ -164,12 +199,15 @@ public function getHotelsByCity(Request $request)
         // IMAGE UPDATE
         $imagePath = $package->image;
         if ($request->hasFile('image')) {
+            // Delete old image
             if ($package->image && file_exists(public_path($package->image))) {
                 unlink(public_path($package->image));
             }
-            $imageName = time() . '.' . $request->image->extension();
-            $request->image->move(public_path('admin/assets/images'), $imageName);
-            $imagePath = 'admin/assets/images/' . $imageName;
+            
+            // Upload new image
+            $imageName = time() . '_' . uniqid() . '.' . $request->image->extension();
+            $request->image->move(public_path('admin/assets/images/umrah-packages'), $imageName);
+            $imagePath = 'admin/assets/images/umrah-packages/' . $imageName;
         }
 
         // UPDATE PACKAGE
@@ -188,13 +226,18 @@ public function getHotelsByCity(Request $request)
         // DELETE OLD DETAILS
         $package->packageDetails()->delete();
 
-        // INSERT NEW DETAILS
-        foreach ($request->cities as $i => $cityId) {
+        // INSERT NEW DETAILS with hotels array
+        foreach ($request->cities as $index => $cityId) {
+            // Check if hotel exists for this index
+            if (!isset($request->hotels[$index])) {
+                throw new \Exception("Hotel not specified for city at position " . ($index + 1));
+            }
+            
             PackageDetail::create([
                 'package_id' => $package->id,
                 'city_id' => $cityId,
-                'hotel_id' => $request->hotel_id,
-                'time_duration' => $request->days[$i] . ' Nights',
+                'hotel_id' => $request->hotels[$index],
+                'time_duration' => $request->days[$index] . ' Nights',
             ]);
         }
 
@@ -204,7 +247,15 @@ public function getHotelsByCity(Request $request)
 
     } catch (\Throwable $e) {
         DB::rollBack();
-        return back()->with('error', $e->getMessage())->withInput();
+        
+        // If new image was uploaded but transaction failed, delete it
+        if ($request->hasFile('image') && isset($imagePath) && $imagePath != $package->image) {
+            if (file_exists(public_path($imagePath))) {
+                unlink(public_path($imagePath));
+            }
+        }
+        
+        return back()->with('error', 'Error updating package: ' . $e->getMessage())->withInput();
     }
 }
 

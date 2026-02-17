@@ -46,7 +46,7 @@ textarea.form-control { height:auto !important; padding:10px 12px !important; }
 {{-- Stars --}}
 <div class="col-md-6 mt-2">
 <label>Stars *</label>
-<input type="number" name="stars" min="1" max="5" class="form-control @error('stars') is-invalid @enderror" value="{{ old('stars') }}">
+<input type="number" name="stars" min="1"  class="form-control @error('stars') is-invalid @enderror" value="{{ old('stars') }}">
 @error('stars')<div class="invalid-feedback">{{ $message }}</div>@enderror
 </div>
 
@@ -125,10 +125,10 @@ textarea.form-control { height:auto !important; padding:10px 12px !important; }
 $(document).ready(function(){
 
     var cities = @json($cities);
-    var hotels = @json($hotels);
-    var getHotelsUrl = "{{ route('getHotelsByCity', ':id') }}";
 
-    // Add city row
+    // Correct base URL
+var getHotelsUrl = "{{ route('getHotelsByCity', ':id') }}";
+
     function addCityRow(selectedCity = '', selectedHotel = '', nights = '') {
         var html = `<div class="city-days-row">
             <div style="flex:2">
@@ -153,20 +153,16 @@ $(document).ready(function(){
         $('#city-days-wrapper').append(html);
     }
 
-    // Initially add one row
     addCityRow();
 
-    // Add new row
     $('#add-city').click(function(){
         addCityRow();
     });
 
-    // Remove row
     $(document).on('click', '.remove-city', function(){
         $(this).closest('.city-days-row').remove();
     });
 
-    // When city changes, load hotels
     $(document).on('change', '.city-select', function(){
         var cityId = $(this).val();
         var hotelSelect = $(this).closest('.city-days-row').find('.hotel-select');
