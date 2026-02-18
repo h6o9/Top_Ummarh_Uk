@@ -1,16 +1,17 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\RoleController;
-use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\FormController;
 use App\Http\Controllers\Admin\SeoController;
-use App\Http\Controllers\SideMenueController;
-use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ContactUsController;
-use App\Http\Controllers\Api\NotificationController;
-use App\Http\Controllers\SideMenuPermissionController;
+use App\Http\Controllers\Api\FightBookingController;
+use App\Http\Controllers\Api\FormController;
 use App\Http\Controllers\Api\GetUmmarhPackagesController;
+use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\SideMenueController;
+use App\Http\Controllers\SideMenuPermissionController;
+use Illuminate\Support\Facades\Route;
 
 
 
@@ -57,6 +58,8 @@ Route::get('/companies-form-details/{form_no}', [FormController::class, 'getComp
 
 // Ummarh Packages 
 Route::get('/ummarh-packages', [GetUmmarhPackagesController::class, 'index']);
+// Flight Booking
+Route::post('/flight-booking', [FightBookingController::class, 'store']);
 
 
 
@@ -81,6 +84,7 @@ Route::post('/submit-contact-us', [ContactUsController::class, 'Submitcontact'])
 //contact us 
 Route::post('/submit-contact-us', [ContactUsController::class, 'Submitcontact'])->name('contact.send');
 Route::get('/getcontact', [ContactUsController::class, 'contactUs'])->name('getcontact');
+
 
 
 });
