@@ -21,6 +21,13 @@ class FlightBooking extends Model
     'infants',
     'name',
     'email',
-    'mobile'
+    'mobile',
+	'reg_code', // ✅ 
+	'status',   // ✅
 ];
+
+   protected $hidden = [
+        'created_at',
+        'updated_at',
+    ];
 }

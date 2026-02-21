@@ -254,4 +254,40 @@ public function update_profile(Request $request)
             'sideMenuName' => $sideMenuName,
         ];
     }
+
+
+	public function store(Request $request)
+    {
+        // Validation
+        $validated = $request->validate([
+            'name'           => 'required|string|max:255',
+            'mobile'         => 'required|string|max:20',
+            'destination'    => 'required|string|max:255',
+            'check_in_date'  => 'required|date|after_or_equal:today',
+            'check_out_date' => 'required|date|after:check_in_date',
+            'rooms'          => 'required|integer|min:1|max:10',
+            'adults'         => 'required|integer|min:1|max:10',
+            'children'       => 'nullable|integer|min:0|max:10',
+        ]);
+
+		$regCode = 'HotelBook-' . rand(100000, 999999);
+
+        // Create booking
+        $booking = HotelBooking::create([
+            'name'           => $validated['name'],
+            'mobile'         => $validated['mobile'],
+            'destination'    => $validated['destination'],
+            'check_in_date'  => $validated['check_in_date'],
+            'check_out_date' => $validated['check_out_date'],
+            'rooms'          => $validated['rooms'],
+            'adults'         => $validated['adults'],
+            'children'       => $validated['children'] ?? 0,
+            'status'         => 'pending',
+            'reg_code'       => $regCode,
+        ]);
+
+        return redirect()->back()->with('success', 'Booking successfully created! Booking ID: #' . $booking->id);
+    }
+
+	 
 }

@@ -15,8 +15,8 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\ContactController;
 use App\Http\Controllers\Admin\SecurityController;
 use App\Http\Controllers\Admin\SubAdminController;
-use App\Http\Controllers\Admin\CustomFormsController;
-use App\Http\Controllers\Admin\NotificationController;
+// use App\Http\Controllers\Admin\CustomFormsController;
+// use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\Admin\UmmrahPackagesController;
 
@@ -55,15 +55,15 @@ Route::prefix('admin')->middleware(['admin', 'check.subadmin.status'])->group(fu
     // ############ Role Permissions #################
 
 	// ########## Form Details #################
-    Route::get('/companies', [CustomFormsController::class, 'index'])->name('admin.companies.index');
-	Route::get('/companies-details/{form_no}', [CustomFormsController::class, 'show'])->name('admin.companies.show');
-	Route::delete('/admin/form-fields/{id}', [CustomFormsController::class, 'destroy'])->name('admin.form-fields.destroy');
+    // Route::get('/companies', [CustomFormsController::class, 'index'])->name('admin.companies.index');
+	// Route::get('/companies-details/{form_no}', [CustomFormsController::class, 'show'])->name('admin.companies.show');
+	// Route::delete('/admin/form-fields/{id}', [CustomFormsController::class, 'destroy'])->name('admin.form-fields.destroy');
 
 
 // form controller routes
 
-    Route::get('/companies-forms-create', [CustomFormsController::class, 'createView'])->name('forms.create');
-	Route::post('/forms-store', [CustomFormsController::class, 'store'])->name('forms.store');
+    // Route::get('/companies-forms-create', [CustomFormsController::class, 'createView'])->name('forms.create');
+	// Route::post('/forms-store', [CustomFormsController::class, 'store'])->name('forms.store');
 
 
             // ############ Roles #################
@@ -161,17 +161,13 @@ Route::post('/blogs/reorder', [BlogController::class, 'reorder'])->name('blog.re
 
  // ############ Notifications #################
 
-    Route::controller(NotificationController::class)->group(function () {
-
-        Route::get('/notification',  'index')->name('notification.index') ->middleware('check.permission:Notifications,view');
-
-        Route::post('/notification-store',  'store')->name('notification.store')->middleware('check.permission:Notifications,create');
-
-        Route::delete('/notification-destroy/{id}',  'destroy')->name('notification.destroy') ->middleware('check.permission:Notifications,delete');
-        Route::delete('/notifications/delete-all', 'deleteAll')->name('notifications.deleteAll');
-        Route::get('/get-users-by-type', 'getUsersByType');
-
-    });
+    // Route::controller(NotificationController::class)->group(function () {
+    //     Route::get('/notification',  'index')->name('notification.index') ->middleware('check.permission:Notifications,view');
+    //     Route::post('/notification-store',  'store')->name('notification.store')->middleware('check.permission:Notifications,create');
+    //     Route::delete('/notification-destroy/{id}',  'destroy')->name('notification.destroy') ->middleware('check.permission:Notifications,delete');
+    //     Route::delete('/notifications/delete-all', 'deleteAll')->name('notifications.deleteAll');
+    //     Route::get('/get-users-by-type', 'getUsersByType');
+    // });
 
 
 
