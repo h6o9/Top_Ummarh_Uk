@@ -35,36 +35,55 @@ class TransportController extends Controller
 
     // ✅ Route select karne ke baad vehicles load hon
     public function getVehiclesByRoute(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'route' => 'required|string',
+{
+    $validator = Validator::make($request->all(), [
+        'route' => 'required|string',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json([
+            'success' => false,
+            'errors'  => $validator->errors(),
+        ], 422);
+    }
+
+    try {
+        $vehicles = DB::table('transport_rates')
+            ->where('route', $request->route)
+            ->select(
+                'vehicle',
+                'vehicle_capacity',
+                'rate_per_passenger'
+            )
+            ->get()
+            ->map(function ($item) {
+
+                return [
+                    'vehicle' => $item->vehicle,
+
+                    // 👇 dropdown label
+                    'label' => $item->vehicle .
+                        ' - Capacity: ' .
+                        ($item->vehicle_capacity ?? 'N/A'),
+
+                    'vehicle_capacity' => $item->vehicle_capacity,
+                    'rate_per_passenger' => $item->rate_per_passenger,
+                ];
+            });
+
+        return response()->json([
+            'success'  => true,
+            'vehicles' => $vehicles,
         ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors'  => $validator->errors(),
-            ], 422);
-        }
-
-        try {
-            $vehicles = DB::table('transport_rates')
-                ->where('route', $request->route)
-                ->select('vehicle', 'rate_per_passenger')
-                ->get();
-
-            return response()->json([
-                'success'  => true,
-                'vehicles' => $vehicles,
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Vehicles load nahi hue.',
-                'error'   => config('app.debug') ? $e->getMessage() : null,
-            ], 500);
-        }
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Vehicles load nahi hue.',
+            'error'   => config('app.debug') ? $e->getMessage() : null,
+        ], 500);
     }
+}
 
     // ✅ Route + Vehicle ke basis par Rate fetch karo
     public function getRate(Request $request)
